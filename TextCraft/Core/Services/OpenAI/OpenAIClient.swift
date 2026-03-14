@@ -30,17 +30,21 @@ actor OpenAIClient {
         self.session = URLSession(configuration: config)
     }
 
-    func streamChat(messages: [OpenAIMessage], apiKey: String) -> AsyncThrowingStream<String, Error> {
+    func streamChat(messages: [OpenAIMessage], apiKey: String, endpoint: String, model: String) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
-                    var request = URLRequest(url: URL(string: Constants.openAIEndpoint)!)
+                    guard let url = URL(string: endpoint) else {
+                        continuation.finish(throwing: OpenAIError.invalidEndpoint)
+                        return
+                    }
+                    var request = URLRequest(url: url)
                     request.httpMethod = "POST"
                     request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
                     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
                     let body = ChatRequest(
-                        model: Constants.openAIModel,
+                        model: model,
                         messages: messages,
                         stream: true
                     )
@@ -85,13 +89,15 @@ actor OpenAIClient {
 
     enum OpenAIError: LocalizedError {
         case invalidResponse
+        case invalidEndpoint
         case httpError(Int)
         case noAPIKey
 
         var errorDescription: String? {
             switch self {
-            case .invalidResponse: return "Invalid response from OpenAI"
-            case .httpError(let code): return "OpenAI returned HTTP \(code)"
+            case .invalidResponse: return "Invalid response from server"
+            case .invalidEndpoint: return "Invalid endpoint URL"
+            case .httpError(let code): return "Server returned HTTP \(code)"
             case .noAPIKey: return "No API key configured"
             }
         }

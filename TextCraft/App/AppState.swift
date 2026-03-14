@@ -6,6 +6,8 @@ final class AppState {
     static let shared = AppState()
 
     var apiKey: String
+    var endpoint: String
+    var model: String
     var selectedText: String = ""
     var sourceAppBundleID: String?
     var sourceAppPID: pid_t = 0
@@ -14,6 +16,8 @@ final class AppState {
 
     private init() {
         self.apiKey = AppState.loadAPIKeyFromKeychain() ?? ""
+        self.endpoint = UserDefaults.standard.string(forKey: "endpoint") ?? Constants.defaultEndpoint
+        self.model = UserDefaults.standard.string(forKey: "model") ?? Constants.defaultModel
     }
 
     func updateSelectedText(_ text: String, from bundleID: String? = nil) {

@@ -7,6 +7,6 @@ enum Constants {
     static let defaultHotkeyModifiers: UInt32 = UInt32(NSEvent.ModifierFlags.command.rawValue | NSEvent.ModifierFlags.shift.rawValue)
     static let keychainServiceName = "com.textcraft.app"
     static let keychainAPIKeyAccount = "openai-api-key"
-    static let openAIEndpoint = "https://api.openai.com/v1/chat/completions"
-    static let openAIModel = "gpt-4o-mini"
+    static let defaultEndpoint = "https://api.openai.com/v1/chat/completions"
+    static let defaultModel = "gpt-4o-mini"
 }

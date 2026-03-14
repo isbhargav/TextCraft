@@ -34,10 +34,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func handleHotkeyTriggered() {
-        Task { @MainActor [weak self] in
-            guard let self else { return }
+        // Capture frontmost app and mouse location immediately, before any async work
+        let frontApp = NSWorkspace.shared.frontmostApplication
+        let mouseLocation = NSEvent.mouseLocation
 
-            guard let result = await textCaptureService.captureSelectedText() else {
+        Task { @MainActor [weak self] in
+            guard let self, let frontApp else { return }
+
+            guard let result = await textCaptureService.captureSelectedText(from: frontApp) else {
                 return
             }
 
@@ -45,7 +49,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             appState.updateSelectedText(result.text, from: result.sourceAppBundleID)
             appState.sourceAppPID = result.sourceAppPID
 
-            let mouseLocation = NSEvent.mouseLocation
             actionPanelController.show(near: mouseLocation)
         }
     }

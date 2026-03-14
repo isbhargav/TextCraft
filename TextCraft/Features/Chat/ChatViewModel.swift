@@ -57,9 +57,10 @@ class ChatViewModel {
     }
 
     private func streamResponse() {
-        let apiKey = AppState.shared.apiKey
+        let appState = AppState.shared
+        let apiKey = appState.apiKey
         guard !apiKey.isEmpty else {
-            error = "Please set your OpenAI API key in Settings."
+            error = "Please set your API key in Settings."
             return
         }
 
@@ -68,10 +69,12 @@ class ChatViewModel {
         session.addAssistantMessage("")
 
         let messages = PromptBuilder.buildMessages(session: session)
+        let endpoint = appState.endpoint
+        let model = appState.model
 
         streamTask = Task {
             do {
-                let stream = await openAIClient.streamChat(messages: messages, apiKey: apiKey)
+                let stream = await openAIClient.streamChat(messages: messages, apiKey: apiKey, endpoint: endpoint, model: model)
                 for try await chunk in stream {
                     session.appendToLastAssistantMessage(chunk)
                 }

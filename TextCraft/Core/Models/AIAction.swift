@@ -12,6 +12,13 @@ enum AIAction: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 
     var systemPrompt: String {
+        if let custom = UserDefaults.standard.string(forKey: promptKey), !custom.isEmpty {
+            return custom
+        }
+        return defaultPrompt
+    }
+
+    var defaultPrompt: String {
         switch self {
         case .fixGrammar:
             return "Fix the grammar and spelling in the following text. Return only the corrected text without explanations."
@@ -28,6 +35,10 @@ enum AIAction: String, CaseIterable, Identifiable {
         case .custom:
             return "You are a helpful writing assistant."
         }
+    }
+
+    var promptKey: String {
+        "prompt.\(rawValue)"
     }
 
     var icon: String {

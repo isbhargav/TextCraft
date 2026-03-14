@@ -2,6 +2,22 @@ import SwiftUI
 import ApplicationServices
 
 struct SettingsView: View {
+    var body: some View {
+        TabView {
+            ProviderSettingsTab()
+                .tabItem { Label("Provider", systemImage: "server.rack") }
+            PromptsSettingsTab()
+                .tabItem { Label("Prompts", systemImage: "text.quote") }
+            GeneralSettingsTab()
+                .tabItem { Label("General", systemImage: "gear") }
+        }
+        .frame(width: 520, height: 480)
+    }
+}
+
+// MARK: - Provider Tab
+
+struct ProviderSettingsTab: View {
     @State private var apiKey: String = ""
     @State private var endpoint: String = ""
     @State private var model: String = ""
@@ -9,12 +25,11 @@ struct SettingsView: View {
     @State private var isTesting: Bool = false
     @State private var testResult: String?
     @State private var curlCommand: String?
-    @State private var hasAccessibility: Bool = false
 
     var body: some View {
         Form {
             Section {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Endpoint")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -24,7 +39,7 @@ struct SettingsView: View {
                         .onChange(of: endpoint) { isSaved = false }
                 }
 
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Model")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -42,12 +57,10 @@ struct SettingsView: View {
             }
 
             Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    SecureField("sk-...", text: $apiKey)
-                        .textFieldStyle(.roundedBorder)
-                        .multilineTextAlignment(.leading)
-                        .onChange(of: apiKey) { isSaved = false }
-                }
+                SecureField("sk-...", text: $apiKey)
+                    .textFieldStyle(.roundedBorder)
+                    .multilineTextAlignment(.leading)
+                    .onChange(of: apiKey) { isSaved = false }
             } header: {
                 Text("API Key")
             } footer: {
@@ -108,70 +121,9 @@ struct SettingsView: View {
                     }
                 }
             }
-
-            Section {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Accessibility")
-                            .font(.body)
-                        Text(hasAccessibility ? "Permission granted" : "Required to read selected text")
-                            .font(.caption)
-                            .foregroundStyle(hasAccessibility ? .green : .secondary)
-                    }
-                    Spacer()
-                    if hasAccessibility {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                    } else {
-                        Button("Grant Access") {
-                            openAccessibilitySettings()
-                        }
-                    }
-                }
-            } header: {
-                Text("Permissions")
-            } footer: {
-                if !hasAccessibility {
-                    Text("TextCraft needs Accessibility permission to read selected text from other apps.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            Section {
-                HStack {
-                    Text("Hotkey")
-                    Spacer()
-                    Text("⌘⇧X")
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(.secondary.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                        .foregroundStyle(.secondary)
-                }
-            } header: {
-                Text("Shortcut")
-            } footer: {
-                Text("Select text in any app and press the hotkey to activate TextCraft.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section {
-                LabeledContent("Version", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
-            } header: {
-                Text("About")
-            }
         }
         .formStyle(.grouped)
-        .frame(width: 480, height: 580)
-        .onAppear {
-            load()
-            checkAccessibility()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-            checkAccessibility()
-        }
+        .onAppear { load() }
     }
 
     private func load() {
@@ -194,16 +146,6 @@ struct SettingsView: View {
 
         isSaved = true
         withAnimation { testResult = nil }
-    }
-
-    private func checkAccessibility() {
-        hasAccessibility = AXIsProcessTrusted()
-    }
-
-    private func openAccessibilitySettings() {
-        let key = "AXTrustedCheckOptionPrompt" as CFString
-        let options = [key: true] as CFDictionary
-        AXIsProcessTrustedWithOptions(options)
     }
 
     private func testConnection() {
@@ -256,6 +198,169 @@ struct SettingsView: View {
             return "Error: Invalid response"
         } catch {
             return "Error: \(error.localizedDescription)"
+        }
+    }
+}
+
+// MARK: - Prompts Tab
+
+struct PromptsSettingsTab: View {
+    @State private var prompts: [AIAction: String] = [:]
+    @State private var isSaved = false
+
+    private var editableActions: [AIAction] {
+        AIAction.allCases
+    }
+
+    var body: some View {
+        Form {
+            ForEach(editableActions) { action in
+                Section {
+                    VStack(alignment: .leading, spacing: 4) {
+                        TextEditor(text: binding(for: action))
+                            .font(.system(size: 12))
+                            .frame(minHeight: 48, maxHeight: 80)
+                            .scrollContentBackground(.hidden)
+                            .padding(4)
+                            .background(.secondary.opacity(0.06))
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                            .onChange(of: prompts[action]) { isSaved = false }
+
+                        if prompts[action] != action.defaultPrompt {
+                            Button("Reset to default") {
+                                prompts[action] = action.defaultPrompt
+                                isSaved = false
+                            }
+                            .font(.caption)
+                            .buttonStyle(.plain)
+                            .foregroundStyle(Color.accentColor)
+                        }
+                    }
+                } header: {
+                    HStack(spacing: 6) {
+                        Image(systemName: action.icon)
+                            .foregroundStyle(.secondary)
+                        Text(action.rawValue)
+                    }
+                }
+            }
+
+            Section {
+                HStack {
+                    Button(isSaved ? "Saved ✓" : "Save Prompts") {
+                        savePrompts()
+                    }
+
+                    Button("Reset All to Defaults") {
+                        resetAll()
+                    }
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .onAppear { loadPrompts() }
+    }
+
+    private func binding(for action: AIAction) -> Binding<String> {
+        Binding(
+            get: { prompts[action] ?? action.defaultPrompt },
+            set: { prompts[action] = $0 }
+        )
+    }
+
+    private func loadPrompts() {
+        for action in AIAction.allCases {
+            prompts[action] = UserDefaults.standard.string(forKey: action.promptKey) ?? action.defaultPrompt
+        }
+        isSaved = true
+    }
+
+    private func savePrompts() {
+        for action in AIAction.allCases {
+            if let prompt = prompts[action], prompt != action.defaultPrompt {
+                UserDefaults.standard.set(prompt, forKey: action.promptKey)
+            } else {
+                UserDefaults.standard.removeObject(forKey: action.promptKey)
+            }
+        }
+        isSaved = true
+    }
+
+    private func resetAll() {
+        for action in AIAction.allCases {
+            prompts[action] = action.defaultPrompt
+            UserDefaults.standard.removeObject(forKey: action.promptKey)
+        }
+        isSaved = true
+    }
+}
+
+// MARK: - General Tab
+
+struct GeneralSettingsTab: View {
+    @State private var hasAccessibility: Bool = false
+
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Accessibility")
+                        Text(hasAccessibility ? "Permission granted" : "Required to read selected text")
+                            .font(.caption)
+                            .foregroundStyle(hasAccessibility ? .green : .secondary)
+                    }
+                    Spacer()
+                    if hasAccessibility {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    } else {
+                        Button("Grant Access") {
+                            let key = "AXTrustedCheckOptionPrompt" as CFString
+                            let options = [key: true] as CFDictionary
+                            AXIsProcessTrustedWithOptions(options)
+                        }
+                    }
+                }
+            } header: {
+                Text("Permissions")
+            } footer: {
+                if !hasAccessibility {
+                    Text("TextCraft needs Accessibility permission to read selected text from other apps.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Section {
+                HStack {
+                    Text("Hotkey")
+                    Spacer()
+                    Text("⌘⇧X")
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(.secondary.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .foregroundStyle(.secondary)
+                }
+            } header: {
+                Text("Shortcut")
+            } footer: {
+                Text("Select text in any app and press the hotkey to activate TextCraft.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                LabeledContent("Version", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
+            } header: {
+                Text("About")
+            }
+        }
+        .formStyle(.grouped)
+        .onAppear { hasAccessibility = AXIsProcessTrusted() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            hasAccessibility = AXIsProcessTrusted()
         }
     }
 }

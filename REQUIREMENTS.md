@@ -1,5 +1,51 @@
 # TextCraft — Requirements
 
+## Build Prerequisites
+
+The following tools are required to build TextCraft from source:
+
+### Required
+
+| Tool | Purpose | Installation |
+|------|---------|-------------|
+| **Xcode** | macOS development environment | App Store or [Apple Developer](https://developer.apple.com/xcode/) |
+| **Xcode Command Line Tools** | Build tools (git, compiler, etc.) | `xcode-select --install` |
+| **xcodegen** | Generate Xcode project from `project.yml` | `brew install xcodegen` |
+
+### Optional
+
+| Tool | Purpose | Installation |
+|------|---------|-------------|
+| **swift-format** | Swift code formatting | `brew install swift-format` |
+| **create-dmg** | Create distributable DMG files | `brew install create-dmg` |
+
+### Quick Setup
+
+```bash
+# Install Homebrew (if not already installed)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install required build tools
+brew install xcodegen
+
+# Install optional tools (recommended)
+brew install swift-format create-dmg
+```
+
+### Build Commands
+
+See the [Makefile](./Makefile) for all build targets:
+
+```bash
+make build         # Build the app (Debug)
+make build-release # Build the app (Release)
+make run           # Build and run the app
+make clean         # Clean build artifacts
+make help          # Show all available commands
+```
+
+---
+
 ## Overview
 
 TextCraft is a lightweight, system-wide text utility that lets users transform selected text using AI. It activates via a global hotkey, presents quick-action options, and opens a minimal chat window powered by OpenAI. The user can refine results conversationally and insert the final text back into the original application.

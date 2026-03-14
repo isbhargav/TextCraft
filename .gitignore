@@ -1,8 +1,4 @@
 .DS_Store
-/Build
-*.xcuserstate
-*.xcuserdatad
-xcuserdata
-DerivedData
+.build
+/build
 *.swp
-*~.nib

@@ -1,0 +1,8 @@
+.DS_Store
+/Build
+*.xcuserstate
+*.xcuserdatad
+xcuserdata
+DerivedData
+*.swp
+*~.nib

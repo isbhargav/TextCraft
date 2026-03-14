@@ -1,0 +1,26 @@
+name: TextCraft
+options:
+  bundleIdPrefix: com.textcraft
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "16.0"
+
+targets:
+  TextCraft:
+    type: application
+    platform: macOS
+    sources:
+      - TextCraft
+    info:
+      path: TextCraft/Resources/Info.plist
+    entitlements:
+      path: TextCraft/TextCraft.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.textcraft.app
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        SWIFT_VERSION: "6.0"
+        INFOPLIST_KEY_LSUIElement: YES
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_IDENTITY: "-"
+        PRODUCT_NAME: TextCraft

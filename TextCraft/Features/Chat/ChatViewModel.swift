@@ -22,7 +22,9 @@ class ChatViewModel {
             return
         }
 
-        session.addUserMessage(session.selectedText)
+        // Show the complete prompt that was sent to LLM
+        let fullPrompt = "Instruction: \(session.action.systemPrompt)\n\nText:\n\(session.selectedText)"
+        session.addUserMessage(fullPrompt)
         streamResponse()
     }
 

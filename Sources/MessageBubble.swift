@@ -4,6 +4,7 @@ struct MessageBubble: View {
     let message: ChatMessage
     let isStreaming: Bool
     let onInsert: () -> Void
+    let onCopy: () -> Void
 
     var body: some View {
         HStack(alignment: .top) {
@@ -22,15 +23,27 @@ struct MessageBubble: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
 
                 if message.role == .assistant && !message.content.isEmpty && !isStreaming {
-                    Button(action: onInsert) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "text.insert")
-                            Text("Insert")
+                    HStack(spacing: 12) {
+                        Button(action: onInsert) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "text.insert")
+                                Text("Insert")
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                         }
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .buttonStyle(.plain)
+
+                        Button(action: onCopy) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "doc.on.doc")
+                                Text("Copy")
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                     .onHover { hovering in
                         if hovering {
                             NSCursor.pointingHand.push()

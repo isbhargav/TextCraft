@@ -32,10 +32,15 @@ struct ChatView: View {
                                 message: message,
                                 isStreaming: viewModel.session.isStreaming
                                     && message.id == viewModel.session.messages.last?.id
-                                    && message.role == .assistant
-                            ) {
-                                viewModel.insertResponse(message.content)
-                            }
+                                    && message.role == .assistant,
+                                onInsert: {
+                                    viewModel.insertResponse(message.content)
+                                },
+                                onCopy: {
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString(message.content, forType: .string)
+                                }
+                            )
                             .id(message.id)
                         }
                     }

@@ -35,21 +35,6 @@ final class AppState {
     }
 
     private static func loadAPIKeyFromKeychain() -> String? {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: "com.textcraft.app.apikey",
-            kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne,
-        ]
-
-        var result: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-
-        guard status == errSecSuccess,
-              let data = result as? Data,
-              let key = String(data: data, encoding: .utf8) else {
-            return nil
-        }
-        return key
+        KeychainService.retrieve(key: Constants.keychainAPIKeyAccount)
     }
 }

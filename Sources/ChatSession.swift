@@ -25,4 +25,9 @@ class ChatSession {
         guard let index = messages.indices.last, messages[index].role == .assistant else { return }
         messages[index].content += chunk
     }
+
+    func removeMessages(from messageID: UUID) {
+        guard let index = messages.firstIndex(where: { $0.id == messageID }) else { return }
+        messages.removeSubrange(index...)
+    }
 }

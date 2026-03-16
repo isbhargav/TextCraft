@@ -5,6 +5,7 @@ struct MessageBubble: View {
     let isStreaming: Bool
     let onInsert: () -> Void
     let onCopy: () -> Void
+    let onRegenerate: () -> Void
 
     var body: some View {
         HStack(alignment: .top) {
@@ -38,6 +39,16 @@ struct MessageBubble: View {
                             HStack(spacing: 4) {
                                 Image(systemName: "doc.on.doc")
                                 Text("Copy")
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+
+                        Button(action: onRegenerate) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.clockwise")
+                                Text("Regenerate")
                             }
                             .font(.caption)
                             .foregroundStyle(.secondary)

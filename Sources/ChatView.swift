@@ -39,6 +39,9 @@ struct ChatView: View {
                                 onCopy: {
                                     NSPasteboard.general.clearContents()
                                     NSPasteboard.general.setString(message.content, forType: .string)
+                                },
+                                onRegenerate: {
+                                    viewModel.regenerateResponse(from: message.id)
                                 }
                             )
                             .id(message.id)

@@ -53,6 +53,13 @@ class ChatViewModel {
         }
     }
 
+    func regenerateResponse(from messageID: UUID) {
+        streamTask?.cancel()
+        session.isStreaming = false
+        session.removeMessages(from: messageID)
+        streamResponse()
+    }
+
     func cancel() {
         streamTask?.cancel()
         session.isStreaming = false

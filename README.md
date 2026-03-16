@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Resources/AppIcon.png" width="128" alt="TextCraft icon">
+</p>
+
 # TextCraft
 
 A macOS menu bar app for AI-powered text manipulation. Select text in any app, hit a hotkey, and pick an action — fix grammar, rewrite, summarize, and more. The result is pasted back in place.
